@@ -1,12 +1,24 @@
 import { IWorkDb, IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb";
 
+
 export class ClientWorkDB implements IWorkDb {
+	private static instance: ClientWorkDB | null = null;
+	private workDbInternal: IWorkDbInternal;
 
-	private workDbInternal : IWorkDbInternal;
-
-    constructor(workDbInternal : IWorkDbInternal) {
+	private constructor(workDbInternal: IWorkDbInternal) {
 		this.workDbInternal = workDbInternal;
-    }
+	}
+
+	/**
+	 * Returns the singleton instance of ClientWorkDB.
+	 * If not created, it will instantiate with the provided IWorkDbInternal.
+	 */
+	static getInstance(workDbInternal: IWorkDbInternal): ClientWorkDB {
+		if (!ClientWorkDB.instance) {
+			ClientWorkDB.instance = new ClientWorkDB(workDbInternal);
+		}
+		return ClientWorkDB.instance;
+	}
 
 	async create(input: Item & ItemId): Promise<void> {
 		if(await this.workDbInternal.exist(input)) {
@@ -53,3 +65,4 @@ export class ClientWorkDB implements IWorkDb {
 		}
 	}
 }
+

@@ -2,6 +2,16 @@ export class ClientWorkDB {
     constructor(workDbInternal) {
         this.workDbInternal = workDbInternal;
     }
+    /**
+     * Returns the singleton instance of ClientWorkDB.
+     * If not created, it will instantiate with the provided IWorkDbInternal.
+     */
+    static getInstance(workDbInternal) {
+        if (!ClientWorkDB.instance) {
+            ClientWorkDB.instance = new ClientWorkDB(workDbInternal);
+        }
+        return ClientWorkDB.instance;
+    }
     async create(input) {
         if (await this.workDbInternal.exist(input)) {
             await this.workDbInternal.writeFile(input);
@@ -16,8 +26,11 @@ export class ClientWorkDB {
         }
     }
     async update(input) {
-        await this.delete(input);
+        let temp = { ...input, id: input.id + "_tmp" };
+        await this.workDbInternal.renameFile(input, temp);
+        // maybe we need to handle an error here
         await this.workDbInternal.writeFile(input);
+        await this.delete(temp);
     }
     async retrieve(input) {
         if (await this.workDbInternal.exist(input)) {
@@ -41,4 +54,5 @@ export class ClientWorkDB {
         }
     }
 }
+ClientWorkDB.instance = null;
 //# sourceMappingURL=ClientWorkDB.js.map

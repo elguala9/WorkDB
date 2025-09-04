@@ -2,6 +2,7 @@ import { IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb";
 export declare class NodeWorkDB implements IWorkDbInternal {
     private _pathDB;
     constructor(pathDb: string);
+    renameFile(oldInput: ItemId, newInput: ItemId): Promise<void>;
     exist(input: ItemId): Promise<boolean>;
     writeFile(input: Item & ItemId): Promise<void>;
     getFile(input: ItemId): Promise<ItemOutput>;
