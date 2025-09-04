@@ -16,21 +16,25 @@
   },
   "main": "index.js",
   "scripts": {
-    "compile": "npm run barrelsby && npm run build && npm run gen-exports",
+    "compile": "npm run barrelsby && npm run build && npm run gen-exports && npm run add-js",
     "build": "npx lage build",
     "barrelsby": "npx lage barrelsby && npm run add-js",
     "gen-exports": "npx lage gen-exports",
-    "add-js": "ts-node utility/add-js-import.ts -ed typeschain",
+    "add-js": "npx add-js-import",
     "clean": "rimraf packages/*/dist",
     "start": "node dist/index.js",
+    
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
+    "typescript": "^5.0.0",
+    "add-js-import": "^1.0.2",
     "barrelsby": "^2.8.1",
     "gen-exports": "^1.1.2",
     "lage": "^2.14.11"
+  },
+  "dependencies": {
+    
+    
   }
 }
