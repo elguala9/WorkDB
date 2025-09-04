@@ -1,0 +1,17 @@
+{
+  "name": "iworkdb",
+  "version": "1.0.0",
+  "description": "Interfaces of WorkDb",
+  "keywords": [
+    "DB"
+  ],
+  "license": "LGPL-3.0-or-later",
+  "author": "Luca Gualandi",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -b",
+    "barrelsby": "barrelsby --directory src --delete --barrelName index.ts --extensions ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
