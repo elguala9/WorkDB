@@ -9,6 +9,20 @@ export class NodeWorkDB {
             this._pathDB = process.cwd();
         }
     }
+    async renameFile(oldInput, newInput) {
+        const { collection: oldCollection, id: oldId } = oldInput;
+        const { collection: newCollection, id: newId } = newInput;
+        const oldFilePath = join(this._pathDB, oldCollection, `${oldId}.json`);
+        const newDirPath = join(this._pathDB, newCollection);
+        const newFilePath = join(newDirPath, `${newId}.json`);
+        // Read the file content
+        const fileContent = await fs.readFile(oldFilePath, "utf8");
+        // Write to new location
+        await fs.mkdir(newDirPath, { recursive: true });
+        await fs.writeFile(newFilePath, fileContent, "utf8");
+        // Delete the old file
+        await fs.unlink(oldFilePath);
+    }
     async exist(input) {
         const { collection, id } = input;
         const filePath = join(this._pathDB, collection, `${id}.json`);

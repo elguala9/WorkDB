@@ -3,4 +3,5 @@
  */
 export * from "./ClientWorkDB.js";
 export * from "./NodeWorkDB.js";
+export * from "./factories/FactoryNode.js";
 //# sourceMappingURL=index.js.map
