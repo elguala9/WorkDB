@@ -1,4 +1,4 @@
-import { IWorkDb, IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb";
+import { IWorkDb, IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
 
 
 export class ClientWorkDB implements IWorkDb {
@@ -21,7 +21,7 @@ export class ClientWorkDB implements IWorkDb {
 	}
 
 	async create(input: Item & ItemId): Promise<void> {
-		if(await this.workDbInternal.exist(input)) {
+		if(await this.workDbInternal.exist(input) === false) {
 			await this.workDbInternal.writeFile(input);
 		} else {
 			throw new Error(`Item with id ${input.id} in collection ${input.collection} already exists.`);

@@ -1,4 +1,4 @@
-import { IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb";
+import { IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
 export declare class NodeWorkDB implements IWorkDbInternal {
     private _pathDB;
     constructor(pathDb: string);

@@ -10,7 +10,8 @@
   "license": "MIT",
 
   "scripts": {
-    
+      "test:workdb-node": "ts-mocha --project ./tsconfig.json ./dist/WorkDBNode.js",
+      "build": "tsc -b"
   },
   "bugs": {
     "url": "https://github.com/elguala9/Ermes/issues"
