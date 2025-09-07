@@ -1,53 +1,45 @@
 import { expect } from "chai";
-import { IWorkDb, IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb";
-
-
-
-
-export function testIIdHandler(workDb: IWorkDb) {
+export function testIWorkDB(workDb) {
     describe('WorkDB Tests', () => {
         it('should create and retrieve an item', async () => {
-            const itemId: ItemId = { id: 'test1', collection: 'testCollection' };
-            const item: Item = { item: { foo: 'bar' } };
+            const itemId = { id: 'test1', collection: 'testCollection' };
+            const item = { item: { foo: 'bar' } };
             await workDb.create({ ...itemId, ...item });
             const result = await workDb.retrieve(itemId);
             expect(result).to.not.be.null;
             expect(result?.item.foo).to.equal('bar');
         });
-
         it('should not create duplicate items', async () => {
-            const itemId: ItemId = { id: 'test2', collection: 'testCollection' };
-            const item: Item = { item: { foo: 'baz' } };
+            const itemId = { id: 'test2', collection: 'testCollection' };
+            const item = { item: { foo: 'baz' } };
             await workDb.create({ ...itemId, ...item });
             try {
                 await workDb.create({ ...itemId, ...item });
                 throw new Error('Duplicate creation did not throw');
-            } catch (e) {
+            }
+            catch (e) {
                 expect(e).to.be.instanceOf(Error);
             }
         });
-
         it('should update an item', async () => {
-            const itemId: ItemId = { id: 'test3', collection: 'testCollection' };
-            const item: Item = { item: { foo: 'old' } };
+            const itemId = { id: 'test3', collection: 'testCollection' };
+            const item = { item: { foo: 'old' } };
             await workDb.create({ ...itemId, ...item });
-            const updated: Item = { item: { foo: 'new' } };
+            const updated = { item: { foo: 'new' } };
             await workDb.update({ ...itemId, ...updated });
             const result = await workDb.retrieve(itemId);
             expect(result?.item.foo).to.equal('new');
         });
-
         it('should delete an item', async () => {
-            const itemId: ItemId = { id: 'test4', collection: 'testCollection' };
-            const item: Item = { item: { foo: 'delete' } };
+            const itemId = { id: 'test4', collection: 'testCollection' };
+            const item = { item: { foo: 'delete' } };
             await workDb.create({ ...itemId, ...item });
             await workDb.delete(itemId);
             const result = await workDb.retrieve(itemId);
             expect(result).to.be.null;
         });
-
         it('should create and retrieve multiple items', async () => {
-            const items: (ItemId & Item)[] = [
+            const items = [
                 { id: 'multi1', collection: 'testCollection', item: { foo: 1 } },
                 { id: 'multi2', collection: 'testCollection', item: { foo: 2 } }
             ];
@@ -58,3 +50,4 @@ export function testIIdHandler(workDb: IWorkDb) {
         });
     });
 }
+//# sourceMappingURL=WorkDB.spec.js.map

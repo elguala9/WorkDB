@@ -18,7 +18,7 @@ module.exports = {
     
     // Gen-exports task - richiede la build
     "gen-exports": {
-      deps: ["barrelsby"],
+      deps: ["build"],
       outputs: []
     },
 

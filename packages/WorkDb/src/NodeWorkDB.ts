@@ -1,7 +1,6 @@
-import { IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb";
+import { IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
 import { promises as fs } from "fs";
 import { join } from "path";
-import { ClientWorkDB } from "./ClientWorkDB.js";
 
 export class NodeWorkDB implements IWorkDbInternal {
 

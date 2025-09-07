@@ -13,7 +13,7 @@ export class ClientWorkDB {
         return ClientWorkDB.instance;
     }
     async create(input) {
-        if (await this.workDbInternal.exist(input)) {
+        if (await this.workDbInternal.exist(input) === false) {
             await this.workDbInternal.writeFile(input);
         }
         else {

@@ -32,3 +32,6 @@ src/**/*.js.map
 
 # Optional: Ignore test output
 *.log
+
+
+db_test

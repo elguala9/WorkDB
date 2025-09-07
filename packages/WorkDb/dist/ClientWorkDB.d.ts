@@ -1,4 +1,4 @@
-import { IWorkDb, IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb";
+import { IWorkDb, IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
 export declare class ClientWorkDB implements IWorkDb {
     private static instance;
     private workDbInternal;
