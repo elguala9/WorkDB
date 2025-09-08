@@ -19,6 +19,11 @@
     "gen-exports": "npx gen-exports dist -p package.json"
   },
   "exports": {
+    "./BrowserWorkDB": {
+      "import": "./dist/BrowserWorkDB.js",
+      "require": "./dist/BrowserWorkDB.js",
+      "types": "./dist/BrowserWorkDB.d.ts"
+    },
     "./ClientWorkDB": {
       "import": "./dist/ClientWorkDB.js",
       "require": "./dist/ClientWorkDB.js",
@@ -38,6 +43,11 @@
       "import": "./dist/WorkDB.js",
       "require": "./dist/WorkDB.js",
       "types": "./dist/WorkDB.d.ts"
+    },
+    "./factories/FactoryBrowser": {
+      "import": "./dist/factories/FactoryBrowser.js",
+      "require": "./dist/factories/FactoryBrowser.js",
+      "types": "./dist/factories/FactoryBrowser.d.ts"
     },
     "./factories/FactoryNode": {
       "import": "./dist/factories/FactoryNode.js",
