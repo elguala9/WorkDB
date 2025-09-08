@@ -1,0 +1,1 @@
+{"version":3,"file":"FactoryBrowser.js","sourceRoot":"","sources":["../../src/factories/FactoryBrowser.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,YAAY,EAAE,MAAM,oBAAoB,CAAC;AAClD,OAAO,EAAE,aAAa,EAAE,MAAM,qBAAqB,CAAC;AAEpD,MAAM,UAAU,6BAA6B,CAAC,eAAwB,MAAM,CAAC,YAAY;IACxF,MAAM,aAAa,GAAG,IAAI,aAAa,CAAC,YAAY,CAAC,CAAC;IACtD,OAAO,YAAY,CAAC,WAAW,CAAC,aAAa,CAAC,CAAC;AAChD,CAAC"}

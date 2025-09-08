@@ -24,11 +24,12 @@
     "add-js": "npx add-js-import",
     "clean": "rimraf packages/*/dist",
     "start": "node dist/index.js",
-    "test:workdb-node": "npm run prepareTest && cd ./packages/TestWorkDb && npm run test:workdb-node"
-
+    "test:workdb-node": "npm run prepareTest && cd ./packages/TestWorkDb && npm run test:workdb-node",
+    "test:workdb-browser": "npm run prepareTest && cd ./packages/TestWorkDb && npm run test:workdb-browser"
   },
   "devDependencies": {
     "@types/node": "^24.3.1",
+    "@types/node-localstorage": "^1.3.3",
     "add-js-import": "^1.0.2",
     "barrelsby": "^2.8.1",
     "gen-exports": "^1.1.2",
