@@ -10,7 +10,8 @@
   "type": "module",
   "main": "dist/index.js",
   "dependencies": {
-    "iworkdb": "1.0.0"
+    "iworkdb": "1.0.0",
+    "@capacitor/preferences": "^7.0.2"
   },
   "scripts": {
     "build": "tsc -b",
@@ -49,10 +50,30 @@
       "require": "./dist/factories/FactoryBrowser.js",
       "types": "./dist/factories/FactoryBrowser.d.ts"
     },
+    "./factories/FactoryCapacitor": {
+      "import": "./dist/factories/FactoryCapacitor.js",
+      "require": "./dist/factories/FactoryCapacitor.js",
+      "types": "./dist/factories/FactoryCapacitor.d.ts"
+    },
     "./factories/FactoryNode": {
       "import": "./dist/factories/FactoryNode.js",
       "require": "./dist/factories/FactoryNode.js",
       "types": "./dist/factories/FactoryNode.d.ts"
+    },
+    "./implementations/BrowserWorkDB": {
+      "import": "./dist/implementations/BrowserWorkDB.js",
+      "require": "./dist/implementations/BrowserWorkDB.js",
+      "types": "./dist/implementations/BrowserWorkDB.d.ts"
+    },
+    "./implementations/CapacitorWorkDB": {
+      "import": "./dist/implementations/CapacitorWorkDB.js",
+      "require": "./dist/implementations/CapacitorWorkDB.js",
+      "types": "./dist/implementations/CapacitorWorkDB.d.ts"
+    },
+    "./implementations/NodeWorkDB": {
+      "import": "./dist/implementations/NodeWorkDB.js",
+      "require": "./dist/implementations/NodeWorkDB.js",
+      "types": "./dist/implementations/NodeWorkDB.d.ts"
     }
   }
 }

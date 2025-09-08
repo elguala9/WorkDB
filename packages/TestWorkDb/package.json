@@ -8,9 +8,10 @@
   ],
   "author": "Luca Gualandi",
   "license": "MIT",
-
+  
   "scripts": {
       "test:workdb-node": "ts-mocha --project ./tsconfig.json ./dist/WorkDBNode.js",
+      "test:workdb-capacitor": "ts-mocha --project ./tsconfig.json ./dist/WorkDBCapacitor.js",
       "test:workdb-browser": "ts-mocha --project ./tsconfig.json ./dist/WorkDBBrowser.js",
       "build": "tsc -b"
   },
