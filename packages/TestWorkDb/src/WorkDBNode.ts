@@ -1,6 +1,6 @@
 import { createClientWorkDBWithNode } from "workdb/index";
-import { testIWorkDB } from './WorkDB.spec.js';
+import { testIWorkDB } from './WorkDB.spec.ts';
 
-const workDb = createClientWorkDBWithNode("./db_test");
+const workDb = createClientWorkDBWithNode("./db_test_node");
 
 testIWorkDB(workDb);

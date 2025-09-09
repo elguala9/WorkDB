@@ -1,3 +1,3 @@
-import { PreferencesPlugin } from "@capacitor/preferences";
+import { FilesystemPlugin } from "@capacitor/filesystem";
 import { ClientWorkDB } from "../ClientWorkDB.js";
-export declare function createClientWorkDBWithCapacitor(preferences?: PreferencesPlugin): ClientWorkDB;
+export declare function createClientWorkDBWithCapacitor(filesystem?: FilesystemPlugin): ClientWorkDB;

@@ -10,9 +10,9 @@
   "license": "MIT",
   
   "scripts": {
-      "test:workdb-node": "ts-mocha --project ./tsconfig.json ./dist/WorkDBNode.js",
-      "test:workdb-capacitor": "ts-mocha --project ./tsconfig.json ./dist/WorkDBCapacitor.js",
-      "test:workdb-browser": "ts-mocha --project ./tsconfig.json ./dist/WorkDBBrowser.js",
+      "test:workdb-node": "ts-mocha --project ./tsconfig.json ./src/WorkDBNode.ts",
+      "test:workdb-capacitor": "ts-mocha --project ./tsconfig.json ./src/WorkDBCapacitor.ts",
+      "test:workdb-browser": "ts-mocha --project ./tsconfig.json ./src/WorkDBBrowser.ts",
       "build": "tsc -b"
   },
   "bugs": {
@@ -22,7 +22,8 @@
   "devDependencies": {
     "@types/chai": "^5.2.1",
     "@types/mocha": "^10.0.10",
-    "chai-as-promised": "^8.0.1"
+    "chai-as-promised": "^8.0.1",
+    "@capacitor/filesystem": "^7.1.4"
   },
   "dependencies": {  
     "node-localstorage": "^3.0.5",

@@ -1,8 +1,9 @@
-import { Preferences, PreferencesPlugin } from "@capacitor/preferences";
-import { CapacitorWorkDB } from "src/implementations/CapacitorWorkDB.js";
+import { Filesystem, FilesystemPlugin } from "@capacitor/filesystem";
+import { CapacitorWorkDB } from "../implementations/CapacitorWorkDB.js";
 import { ClientWorkDB } from "../ClientWorkDB.js";
 
-export function createClientWorkDBWithCapacitor(preferences: PreferencesPlugin = Preferences): ClientWorkDB {
-	const capacitorWorkDb = new CapacitorWorkDB(preferences);
-	return ClientWorkDB.getInstance(capacitorWorkDb);
+
+export function createClientWorkDBWithCapacitor(filesystem: FilesystemPlugin = Filesystem): ClientWorkDB {
+    const capacitorWorkDb = new CapacitorWorkDB(filesystem);
+    return ClientWorkDB.getInstance(capacitorWorkDb);
 }
