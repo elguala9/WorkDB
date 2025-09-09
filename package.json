@@ -27,7 +27,6 @@
     "test:workdb-node": "npm run prepareTest && cd ./packages/TestWorkDb && npm run test:workdb-node",
     "test:workdb-browser": "npm run prepareTest && cd ./packages/TestWorkDb && npm run test:workdb-browser",
     "test:workdb-capacitor": "npm run prepareTest && cd ./packages/TestWorkDb && npm run test:workdb-capacitor"
-
   },
   "devDependencies": {
     "@types/node": "^24.3.1",
@@ -37,8 +36,5 @@
     "gen-exports": "^1.1.2",
     "lage": "^2.14.11",
     "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@capacitor/preferences": "^7.0.2"
   }
 }

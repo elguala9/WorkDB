@@ -34,4 +34,4 @@ src/**/*.js.map
 *.log
 
 
-db_test
+db_test*
