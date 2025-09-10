@@ -56,5 +56,102 @@ export function testIWorkDB(workDb: IWorkDb) {
             expect(results[0]?.item.foo).to.equal(1);
             expect(results[1]?.item.foo).to.equal(2);
         });
+
+        it('should return null for non-existent item', async () => {
+            const itemId: ItemId = { id: 'notfound', collection: 'testCollection' };
+            const result = await workDb.retrieve(itemId);
+            expect(result).to.be.null;
+        });
+
+        it('should throw when updating non-existent item', async () => {
+            const itemId: ItemId = { id: 'noitem', collection: 'testCollection' };
+            const item: Item = { item: { foo: 'fail' } };
+            try {
+                await workDb.update({ ...itemId, ...item });
+                throw new Error('Update of non-existent item did not throw');
+            } catch (e) {
+                expect(e).to.be.instanceOf(Error);
+            }
+        });
+
+        it('should throw when deleting non-existent item', async () => {
+            const itemId: ItemId = { id: 'noitem', collection: 'testCollection' };
+            try {
+                await workDb.delete(itemId);
+                throw new Error('Delete of non-existent item did not throw');
+            } catch (e) {
+                expect(e).to.be.instanceOf(Error);
+            }
+        });
+
+        it('should not create item with empty id or collection', async () => {
+            const invalids = [
+                { id: '', collection: 'testCollection', item: { foo: 'bad' } },
+                { id: 'bad', collection: '', item: { foo: 'bad' } }
+            ];
+            for (const input of invalids) {
+                try {
+                    await workDb.create(input);
+                    throw new Error('Creation with invalid id/collection did not throw');
+                } catch (e) {
+                    expect(e).to.be.instanceOf(Error);
+                }
+            }
+        });
+
+        it('should handle update after delete', async () => {
+            const itemId: ItemId = { id: 'delupdate', collection: 'testCollection' };
+            const item: Item = { item: { foo: 'first' } };
+            await workDb.create({ ...itemId, ...item });
+            await workDb.delete(itemId);
+            try {
+                await workDb.update({ ...itemId, ...item });
+                throw new Error('Update after delete did not throw');
+            } catch (e) {
+                expect(e).to.be.instanceOf(Error);
+            }
+        });
+
+        it('should retrieve multiple with some missing', async () => {
+            const items: (ItemId & Item)[] = [
+                { id: 'multiA', collection: 'testCollection', item: { foo: 'A' } },
+                { id: 'multiB', collection: 'testCollection', item: { foo: 'B' } }
+            ];
+            await workDb.createMultiple(items);
+            const ids = [
+                { id: 'multiA', collection: 'testCollection' },
+                { id: 'notfound', collection: 'testCollection' },
+                { id: 'multiB', collection: 'testCollection' }
+            ];
+            const results = await workDb.retrieveMultiple(ids);
+            expect(results[0]?.item.foo).to.equal('A');
+            expect(results[1]).to.be.null;
+            expect(results[2]?.item.foo).to.equal('B');
+        });
+
+        it('should delete multiple items', async () => {
+            const items: (ItemId & Item)[] = [
+                { id: 'del1', collection: 'testCollection', item: { foo: 1 } },
+                { id: 'del2', collection: 'testCollection', item: { foo: 2 } }
+            ];
+            await workDb.createMultiple(items);
+            for (const item of items) {
+                await workDb.delete({ id: item.id, collection: item.collection });
+            }
+            const results = await workDb.retrieveMultiple(items.map(i => ({ id: i.id, collection: i.collection })));
+            expect(results[0]).to.be.null;
+            expect(results[1]).to.be.null;
+        });
+
+        it('should not create item with non-serializable data', async () => {
+            const itemId: ItemId = { id: 'badjson', collection: 'testCollection' };
+            const item: Item = { item: { foo: "" } };
+            try {
+                await workDb.create({ ...itemId, ...item });
+                throw new Error('Creation with non-serializable data did not throw');
+            } catch (e) {
+                expect(e).to.be.instanceOf(Error);
+            }
+        });
     });
 }
