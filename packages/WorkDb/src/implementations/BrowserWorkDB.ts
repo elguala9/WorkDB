@@ -1,6 +1,6 @@
-import { IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
+import { IWorkFileSystem, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
 
-export class BrowserWorkDB implements IWorkDbInternal {
+export class BrowserWorkDB implements IWorkFileSystem {
 
     private _localStorage: Storage;
 
@@ -8,38 +8,40 @@ export class BrowserWorkDB implements IWorkDbInternal {
         this._localStorage = localStorage;
     }
 
-    private getKey(collection: string, id: string): string {
-        return `${collection}/${id}`;
-    }
-
-    async renameFile(oldInput: ItemId, newInput: ItemId): Promise<void> {
-        // Usa i metodi già esistenti per rinominare
-        const oldFile = await this.getFile(oldInput);
-        await this.writeFile({ ...newInput, item: oldFile.item });
-        await this.deleteFile(oldInput);
-    }
-
-    async exist(input: ItemId): Promise<boolean> {
-        const key = this.getKey(input.collection, input.id);
-        return this._localStorage.getItem(key) !== null;
-    }
-
-    async writeFile(input: Item & ItemId): Promise<void> {
-        const key = this.getKey(input.collection, input.id);
+    async writeFile(path: string, input: Item): Promise<void> {
         const data = JSON.stringify(input.item, null, 2);
-        this._localStorage.setItem(key, data);
+        this._localStorage.setItem(path, data);
     }
 
-    async getFile(input: ItemId): Promise<ItemOutput> {
-        const key = this.getKey(input.collection, input.id);
-        const data = this._localStorage.getItem(key);
+    async getFile(path: string): Promise<ItemOutput> {
+        const data = this._localStorage.getItem(path);
         if (data === null) throw new Error("File does not exist");
-        // localStorage does not store creation time, so we omit it
         return { item: JSON.parse(data) };
     }
 
-    async deleteFile(input: ItemId): Promise<void> {
-        const key = this.getKey(input.collection, input.id);
-        this._localStorage.removeItem(key);
+    async deleteFile(path: string): Promise<void> {
+        this._localStorage.removeItem(path);
+    }
+
+    async deleteFolder(folderPath: string): Promise<void> {
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < this._localStorage.length; i++) {
+            const key = this._localStorage.key(i);
+            if (key && key.startsWith(folderPath)) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach(key => this._localStorage.removeItem(key));
+    }
+
+    async exist(path: string): Promise<boolean> {
+        return this._localStorage.getItem(path) !== null;
+    }
+
+    async renameFile(oldPath: string, newPath: string): Promise<void> {
+        const data = this._localStorage.getItem(oldPath);
+        if (data === null) throw new Error("File does not exist");
+        this._localStorage.setItem(newPath, data);
+        this._localStorage.removeItem(oldPath);
     }
 }

@@ -153,5 +153,38 @@ export function testIWorkDB(workDb: IWorkDb) {
                 expect(e).to.be.instanceOf(Error);
             }
         });
+
+            it('should delete a collection', async () => {
+                const items: (ItemId & Item)[] = [
+                    { id: 'col1', collection: 'toDelete', item: { foo: 1 } },
+                    { id: 'col2', collection: 'toDelete', item: { foo: 2 } },
+                    { id: 'col3', collection: 'toKeep', item: { foo: 3 } }
+                ];
+                await workDb.createMultiple(items);
+                await workDb.deleteCollection('toDelete');
+                const results = await workDb.retrieveMultiple([
+                    { id: 'col1', collection: 'toDelete' },
+                    { id: 'col2', collection: 'toDelete' },
+                    { id: 'col3', collection: 'toKeep' }
+                ]);
+                expect(results[0]).to.be.null;
+                expect(results[1]).to.be.null;
+                expect(results[2]?.item.foo).to.equal(3);
+            });
+
+            it('should clear the database', async () => {
+                const items: (ItemId & Item)[] = [
+                    { id: 'db1', collection: 'colA', item: { foo: 'A' } },
+                    { id: 'db2', collection: 'colB', item: { foo: 'B' } }
+                ];
+                await workDb.createMultiple(items);
+                await workDb.clearDatabase();
+                const results = await workDb.retrieveMultiple([
+                    { id: 'db1', collection: 'colA' },
+                    { id: 'db2', collection: 'colB' }
+                ]);
+                expect(results[0]).to.be.null;
+                expect(results[1]).to.be.null;
+            });
     });
 }

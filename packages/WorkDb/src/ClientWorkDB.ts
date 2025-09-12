@@ -1,19 +1,39 @@
-import { IWorkDb, IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
+import { IWorkDb, IWorkFileSystem, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
 
 
 export class ClientWorkDB implements IWorkDb {
 	private static instance: ClientWorkDB | null = null;
-	private workDbInternal: IWorkDbInternal;
+	private workDbInternal: IWorkFileSystem;
 
-	private constructor(workDbInternal: IWorkDbInternal) {
+	private constructor(workDbInternal: IWorkFileSystem) {
 		this.workDbInternal = workDbInternal;
 	}
 
+	deleteCollection (collection: string): Promise<void> {
+		return this.workDbInternal.deleteFolder(this.getCollectionPath(collection));
+	}
+
+	clearDatabase (): Promise<void> {
+		return this.workDbInternal.deleteFolder(this.getRoot());
+	};
+
+	private getItemPath(itemId: ItemId): string {
+        return this.getCollectionPath(itemId.collection) + `/${itemId.id}`;
+    }
+
+	private getCollectionPath(collection: string): string {
+        return this.getRoot() + `/${collection}`;
+    }
+
+	private getRoot(): string {
+        return `./WorkDB`;
+    }
+
 	/**
 	 * Returns the singleton instance of ClientWorkDB.
-	 * If not created, it will instantiate with the provided IWorkDbInternal.
+	 * If not created, it will instantiate with the provided IWorkFileSystem.
 	 */
-	static getInstance(workDbInternal: IWorkDbInternal): ClientWorkDB {
+	static getInstance(workDbInternal: IWorkFileSystem): ClientWorkDB {
 		if (!ClientWorkDB.instance) {
 			ClientWorkDB.instance = new ClientWorkDB(workDbInternal);
 		}
@@ -21,8 +41,9 @@ export class ClientWorkDB implements IWorkDb {
 	}
 
 	async create(input: Item & ItemId): Promise<void> {
-		if(await this.workDbInternal.exist(input) === false) {
-			await this.workDbInternal.writeFile(input);
+		const path = this.getItemPath(input);
+		if(await this.workDbInternal.exist(path) === false) {
+			await this.workDbInternal.writeFile(path, { item: input.item });
 		} else {
 			throw new Error(`Item with id ${input.id} in collection ${input.collection} already exists.`);
 		}
@@ -35,16 +56,18 @@ export class ClientWorkDB implements IWorkDb {
 	}
 
 	async update(input: Item & ItemId): Promise<void> {
-		let temp: Item & ItemId= {...input, id: input.id + "_tmp"}
-		await this.workDbInternal.renameFile(input, temp);
-		// maybe we need to handle an error here
-		await this.workDbInternal.writeFile(input);
-		await this.delete(temp);
+		const path = this.getItemPath(input);
+		if(await this.workDbInternal.exist(path)) {
+			await this.workDbInternal.writeFile(path, { item: input.item });
+		} else {
+			throw new Error(`Item with id ${input.id} in collection ${input.collection} does not exist.`);
+		}
 	}
 
 	async retrieve(input: ItemId): Promise<ItemOutput | null> {
-		if(await this.workDbInternal.exist(input)) {
-			return await this.workDbInternal.getFile(input);
+		const path = this.getItemPath(input);
+		if(await this.workDbInternal.exist(path)) {
+			return await this.workDbInternal.getFile(path);
 		}
 		return null;
 	}
@@ -58,8 +81,9 @@ export class ClientWorkDB implements IWorkDb {
 	}
 
 	async delete(input: ItemId): Promise<void> {
-		if(await this.workDbInternal.exist(input)) {
-			await this.workDbInternal.deleteFile(input);
+		const path = this.getItemPath(input);
+		if(await this.workDbInternal.exist(path)) {
+			await this.workDbInternal.deleteFile(path);
 		} else {
 			throw new Error(`Item with id ${input.id} in collection ${input.collection} does not exist.`);
 		}

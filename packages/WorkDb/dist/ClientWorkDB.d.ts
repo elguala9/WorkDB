@@ -1,13 +1,18 @@
-import { IWorkDb, IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
+import { IWorkDb, IWorkFileSystem, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
 export declare class ClientWorkDB implements IWorkDb {
     private static instance;
     private workDbInternal;
     private constructor();
+    deleteCollection(collection: string): Promise<void>;
+    clearDatabase(): Promise<void>;
+    private getItemPath;
+    private getCollectionPath;
+    private getRoot;
     /**
      * Returns the singleton instance of ClientWorkDB.
-     * If not created, it will instantiate with the provided IWorkDbInternal.
+     * If not created, it will instantiate with the provided IWorkFileSystem.
      */
-    static getInstance(workDbInternal: IWorkDbInternal): ClientWorkDB;
+    static getInstance(workDbInternal: IWorkFileSystem): ClientWorkDB;
     create(input: Item & ItemId): Promise<void>;
     createMultiple(inputs: (ItemId & Item)[]): Promise<void>;
     update(input: Item & ItemId): Promise<void>;

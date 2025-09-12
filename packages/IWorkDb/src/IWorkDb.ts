@@ -53,13 +53,25 @@ export interface IWorkDb {
      * @param input The collection and id of the item to delete.
      */
     delete: (input: ItemId) => Promise<void>;
+
+    /**
+     * Deletes a collection
+     * @param collection The name of the collection to delete.
+     */
+    deleteCollection: (collection: string) => Promise<void>;
+
+    /**
+     * completely clears the database
+     */
+    clearDatabase: () => Promise<void>;
 }
 
 
-export interface IWorkDbInternal {
-    writeFile: (input: Item & ItemId) => Promise<void>;
-    getFile: (input: ItemId) => Promise<ItemOutput>;
-    deleteFile: (input: ItemId) => Promise<void>;
-    exist: (input: ItemId) => Promise<boolean>;
-    renameFile: (oldInput: ItemId, newInput: ItemId) => Promise<void>;
+export interface IWorkFileSystem {
+    writeFile: (path: string, input: Item) => Promise<void>;
+    getFile: (path: string) => Promise<ItemOutput>;
+    deleteFile: (path: string) => Promise<void>;
+    deleteFolder: (folderPath: string) => Promise<void>;
+    exist: (path: string) => Promise<boolean>;
+    renameFile: (oldPath: string, newPath: string) => Promise<void>;
 }

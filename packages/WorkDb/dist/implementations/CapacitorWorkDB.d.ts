@@ -1,12 +1,12 @@
-import { IWorkDbInternal, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
+import { IWorkFileSystem, Item, ItemOutput } from "iworkdb/IWorkDb";
 import { FilesystemPlugin } from "@capacitor/filesystem";
-export declare class CapacitorWorkDB implements IWorkDbInternal {
+export declare class CapacitorWorkDB implements IWorkFileSystem {
     private _filesystem;
     constructor(filesystem?: FilesystemPlugin);
-    private getFilePath;
-    renameFile(oldInput: ItemId, newInput: ItemId): Promise<void>;
-    exist(input: ItemId): Promise<boolean>;
-    writeFile(input: Item & ItemId): Promise<void>;
-    getFile(input: ItemId): Promise<ItemOutput>;
-    deleteFile(input: ItemId): Promise<void>;
+    writeFile(path: string, input: Item): Promise<void>;
+    getFile(path: string): Promise<ItemOutput>;
+    deleteFile(path: string): Promise<void>;
+    deleteFolder(folderPath: string): Promise<void>;
+    exist(path: string): Promise<boolean>;
+    renameFile(oldPath: string, newPath: string): Promise<void>;
 }
