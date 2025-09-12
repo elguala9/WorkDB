@@ -38,37 +38,24 @@ export class MockCapacitorFS implements FilesystemPlugin {
   }
   
   mkdir(options: MkdirOptions): Promise<void> {
-    const { path, recursive } = options;
-    if (recursive) {
-      const parts = path.split('/').filter(Boolean);
-      let currentPath = '';
-      for (const part of parts) {
-        currentPath += '/' + part;
-        this.directories.add(currentPath);
-      }
-    } else {
-      this.directories.add(path);
-    }
+    const { path } = options;
+    this.directories.add(path);
     return Promise.resolve();
   }
   
   rmdir(options: RmdirOptions): Promise<void> {
-    const { path, recursive } = options;
-    if (recursive) {
-      // Delete directory and all contained files/subdirectories
-      this.directories.delete(path);
-      for (const dir of Array.from(this.directories)) {
-        if (dir.startsWith(path + '/')) {
-          this.directories.delete(dir);
-        }
+    const { path } = options;
+    // Elimina tutti i file che iniziano con path (simulazione directory flat)
+    for (const filePath of Array.from(this.store.keys())) {
+      if (filePath === path || filePath.startsWith(path + '/')) {
+        this.store.delete(filePath);
       }
-      for (const filePath of Array.from(this.store.keys())) {
-        if (filePath.startsWith(path + '/')) {
-          this.store.delete(filePath);
-        }
+    }
+    // Elimina anche le "directory" virtuali
+    for (const dir of Array.from(this.directories)) {
+      if (dir === path || dir.startsWith(path + '/')) {
+        this.directories.delete(dir);
       }
-    } else {
-      this.directories.delete(path);
     }
     return Promise.resolve();
   }
@@ -76,42 +63,20 @@ export class MockCapacitorFS implements FilesystemPlugin {
   readdir(options: ReaddirOptions): Promise<ReaddirResult> {
     const { path } = options;
     const entries: FileInfo[] = [];
-    
-    // Get directories
-    for (const dir of this.directories) {
-      if (dir.startsWith(path + '/') && dir !== path) {
-        const dirName = dir.substring(path.length + 1).split('/')[0];
-        const dirPath = path + '/' + dirName;
-        if (this.directories.has(dirPath)) {
-          entries.push({
-            name: dirName,
-            type: 'directory',
-            uri: dirPath,
-            mtime: Date.now(),
-            ctime: Date.now(),
-            size: 0
-          });
-        }
-      }
-    }
-    
-    // Get files
+    // File flat: tutti i file che iniziano con path
     for (const filePath of this.store.keys()) {
-      if (filePath.startsWith(path + '/')) {
-        const fileName = filePath.substring(path.length + 1).split('/')[0];
-        if (!filePath.substring(path.length + 1).includes('/')) {
-          entries.push({
-            name: fileName,
-            type: 'file',
-            uri: filePath,
-            mtime: Date.now(),
-            ctime: Date.now(),
-            size: this.store.get(filePath)?.length || 0
-          });
-        }
+      if (filePath === path || filePath.startsWith(path + '/')) {
+        const name = filePath.substring(path.length + 1);
+        entries.push({
+          name,
+          type: 'file',
+          uri: filePath,
+          mtime: Date.now(),
+          ctime: Date.now(),
+          size: this.store.get(filePath)?.length || 0
+        });
       }
     }
-    
     return Promise.resolve({ files: entries });
   }
   
