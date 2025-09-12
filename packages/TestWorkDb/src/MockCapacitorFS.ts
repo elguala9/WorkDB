@@ -2,6 +2,15 @@ import { PluginListenerHandle } from "@capacitor/core";
 import { FilesystemPlugin, Directory, Encoding, FileInfo, AppendFileOptions, CallbackID, CopyOptions, CopyResult, DownloadFileOptions, DownloadFileResult, GetUriOptions, GetUriResult, MkdirOptions, PermissionStatus, ProgressListener, ReaddirOptions, ReaddirResult, ReadFileInChunksCallback, ReadFileInChunksOptions, RenameOptions, RmdirOptions } from "@capacitor/filesystem";
 
 export class MockCapacitorFS implements FilesystemPlugin {
+  async ls(path: string): Promise<string[]> {
+    const files: string[] = [];
+    for (const filePath of this.store.keys()) {
+      if (filePath === path || filePath.startsWith(path + '/')) {
+        files.push(filePath);
+      }
+    }
+    return files;
+  }
   private store = new Map<string, string>();
   private directories = new Set<string>();
   private listeners: Map<string, ProgressListener[]> = new Map();

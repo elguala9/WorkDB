@@ -54,6 +54,8 @@ export interface IWorkDb {
      * completely clears the database
      */
     clearDatabase: () => Promise<void>;
+    getItemsInCollection: (collection: string) => Promise<string[]>;
+    getCollections: () => Promise<string[]>;
 }
 export interface IWorkFileSystem {
     writeFile: (path: string, input: Item) => Promise<void>;
@@ -62,4 +64,5 @@ export interface IWorkFileSystem {
     deleteFolder: (folderPath: string) => Promise<void>;
     exist: (path: string) => Promise<boolean>;
     renameFile: (oldPath: string, newPath: string) => Promise<void>;
+    ls(path: string): Promise<string[]>;
 }

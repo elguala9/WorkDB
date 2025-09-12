@@ -9,20 +9,32 @@ export class NodeWorkDB {
             this._pathDB = process.cwd();
         }
     }
+    async ls(path) {
+        const dirPath = join(this._pathDB, path);
+        let files = [];
+        try {
+            const filesList = await fs.readdir(dirPath);
+            files = filesList;
+        }
+        catch {
+            // directory does not exist
+        }
+        return files;
+    }
     async writeFile(path, input) {
         const dirPath = join(this._pathDB, path.split('/').slice(0, -1).join('/'));
-        const filePath = join(this._pathDB, path + '.json');
+        const filePath = join(this._pathDB, path);
         const data = JSON.stringify(input.item, null, 2);
         await fs.mkdir(dirPath, { recursive: true });
         await fs.writeFile(filePath, data, "utf8");
     }
     async getFile(path) {
-        const filePath = join(this._pathDB, path + '.json');
+        const filePath = join(this._pathDB, path);
         const data = await fs.readFile(filePath, "utf8");
         return { item: JSON.parse(data) };
     }
     async deleteFile(path) {
-        const filePath = join(this._pathDB, path + '.json');
+        const filePath = join(this._pathDB, path);
         await fs.unlink(filePath);
     }
     async deleteFolder(folderPath) {
@@ -30,7 +42,7 @@ export class NodeWorkDB {
         await fs.rm(fullPath, { recursive: true, force: true });
     }
     async exist(path) {
-        const filePath = join(this._pathDB, path + '.json');
+        const filePath = join(this._pathDB, path);
         try {
             await fs.access(filePath);
             return true;
@@ -40,9 +52,9 @@ export class NodeWorkDB {
         }
     }
     async renameFile(oldPath, newPath) {
-        const oldFilePath = join(this._pathDB, oldPath + '.json');
+        const oldFilePath = join(this._pathDB, oldPath);
         const newDirPath = join(this._pathDB, newPath.split('/').slice(0, -1).join('/'));
-        const newFilePath = join(this._pathDB, newPath + '.json');
+        const newFilePath = join(this._pathDB, newPath);
         await fs.mkdir(newDirPath, { recursive: true });
         await fs.rename(oldFilePath, newFilePath);
     }

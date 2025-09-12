@@ -19,4 +19,6 @@ export declare class ClientWorkDB implements IWorkDb {
     retrieve(input: ItemId): Promise<ItemOutput | null>;
     retrieveMultiple(ids: ItemId[]): Promise<(ItemOutput | null)[]>;
     delete(input: ItemId): Promise<void>;
+    getItemsInCollection(collection: string): Promise<string[]>;
+    getCollections(): Promise<string[]>;
 }

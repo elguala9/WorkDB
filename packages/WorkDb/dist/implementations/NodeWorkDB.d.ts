@@ -2,6 +2,7 @@ import { IWorkFileSystem, Item, ItemOutput } from "iworkdb/IWorkDb";
 export declare class NodeWorkDB implements IWorkFileSystem {
     private _pathDB;
     constructor(pathDb: string);
+    ls(path: string): Promise<string[]>;
     writeFile(path: string, input: Item): Promise<void>;
     getFile(path: string): Promise<ItemOutput>;
     deleteFile(path: string): Promise<void>;
