@@ -74,6 +74,25 @@ export class ClientWorkDB {
             throw new Error(`Item with id ${input.id} in collection ${input.collection} does not exist.`);
         }
     }
+    async getItemsInCollection(collection) {
+        const path = this.getCollectionPath(collection);
+        const files = await this.workDbInternal.ls(path);
+        // Restituisce solo gli id degli item nella collection
+        return files.map(f => f.replace(path + '/', ''));
+    }
+    async getCollections() {
+        const path = this.getRoot();
+        const files = await this.workDbInternal.ls(path);
+        // Restituisce solo i nomi delle collection (primo livello)
+        const collections = new Set();
+        for (const f of files) {
+            const rel = f.replace(path + '/', '');
+            const col = rel.split('/')[0];
+            if (col)
+                collections.add(col);
+        }
+        return Array.from(collections);
+    }
 }
 ClientWorkDB.instance = null;
 //# sourceMappingURL=ClientWorkDB.js.map

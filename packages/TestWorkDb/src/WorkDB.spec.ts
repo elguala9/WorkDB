@@ -186,5 +186,31 @@ export function testIWorkDB(workDb: IWorkDb) {
                 expect(results[0]).to.be.null;
                 expect(results[1]).to.be.null;
             });
+
+            it('should list items in a collection', async () => {
+                const items: (ItemId & Item)[] = [
+                    { id: 'item10', collection: 'colA', item: { foo: 1 } },
+                    { id: 'item20', collection: 'colA', item: { foo: 2 } },
+                    { id: 'item30', collection: 'colB', item: { foo: 3 } }
+                ];
+                await workDb.createMultiple(items);
+                const idsA = await (workDb as any).getItemsInCollection('colA');
+                expect(idsA).to.include('item10');
+                expect(idsA).to.include('item20');
+                expect(idsA).to.not.include('item30');
+            });
+
+            it('should list all collections', async () => {
+                const items: (ItemId & Item)[] = [
+                    { id: 'item11', collection: 'colA', item: { foo: 1 } },
+                    { id: 'item21', collection: 'colB', item: { foo: 2 } },
+                    { id: 'item31', collection: 'colC', item: { foo: 3 } }
+                ];
+                await workDb.createMultiple(items);
+                const collections = await (workDb as any).getCollections();
+                expect(collections).to.include('colA');
+                expect(collections).to.include('colB');
+                expect(collections).to.include('colC');
+            });
     });
 }

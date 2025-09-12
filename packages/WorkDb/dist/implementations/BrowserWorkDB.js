@@ -1,4 +1,14 @@
 export class BrowserWorkDB {
+    async ls(path) {
+        const files = [];
+        for (let i = 0; i < this._localStorage.length; i++) {
+            const key = this._localStorage.key(i);
+            if (key && (key === path || key.startsWith(path + '/'))) {
+                files.push(key);
+            }
+        }
+        return files;
+    }
     constructor(localStorage = window.localStorage) {
         this._localStorage = localStorage;
     }

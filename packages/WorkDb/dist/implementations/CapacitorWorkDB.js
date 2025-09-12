@@ -1,5 +1,9 @@
 import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 export class CapacitorWorkDB {
+    async ls(path) {
+        const result = await this._filesystem.readdir({ path, directory: Directory.Data });
+        return result.files.map(f => f.uri);
+    }
     constructor(filesystem = Filesystem) {
         this._filesystem = filesystem;
     }

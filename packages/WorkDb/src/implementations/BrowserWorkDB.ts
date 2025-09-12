@@ -1,6 +1,16 @@
 import { IWorkFileSystem, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
 
 export class BrowserWorkDB implements IWorkFileSystem {
+    async ls(path: string): Promise<string[]> {
+        const files: string[] = [];
+        for (let i = 0; i < this._localStorage.length; i++) {
+            const key = this._localStorage.key(i);
+            if (key && (key === path || key.startsWith(path + '/'))) {
+                files.push(key);
+            }
+        }
+        return files;
+    }
 
     private _localStorage: Storage;
 

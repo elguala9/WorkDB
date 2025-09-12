@@ -2,6 +2,10 @@ import { IWorkFileSystem, Item, ItemId, ItemOutput } from "iworkdb/IWorkDb";
 import { Filesystem , Directory, Encoding, FilesystemPlugin } from "@capacitor/filesystem";
 
 export class CapacitorWorkDB implements IWorkFileSystem {
+    async ls(path: string): Promise<string[]> {
+        const result = await this._filesystem.readdir({ path, directory: Directory.Data });
+        return result.files.map(f => f.uri);
+    }
     private _filesystem: FilesystemPlugin;
 
     constructor(filesystem: FilesystemPlugin = Filesystem) {

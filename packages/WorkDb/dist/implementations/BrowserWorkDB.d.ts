@@ -1,5 +1,6 @@
 import { IWorkFileSystem, Item, ItemOutput } from "iworkdb/IWorkDb";
 export declare class BrowserWorkDB implements IWorkFileSystem {
+    ls(path: string): Promise<string[]>;
     private _localStorage;
     constructor(localStorage?: Storage);
     writeFile(path: string, input: Item): Promise<void>;
