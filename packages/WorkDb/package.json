@@ -55,6 +55,11 @@
       "require": "./dist/factories/FactoryCapacitor.js",
       "types": "./dist/factories/FactoryCapacitor.d.ts"
     },
+    "./factories/FactoryClientWorkDB": {
+      "import": "./dist/factories/FactoryClientWorkDB.js",
+      "require": "./dist/factories/FactoryClientWorkDB.js",
+      "types": "./dist/factories/FactoryClientWorkDB.d.ts"
+    },
     "./factories/FactoryNode": {
       "import": "./dist/factories/FactoryNode.js",
       "require": "./dist/factories/FactoryNode.js",
