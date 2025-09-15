@@ -7,6 +7,7 @@ export * from "./ClientWorkDB.js";
 export * from "./NodeWorkDB.js";
 export * from "./factories/FactoryBrowser.js";
 export * from "./factories/FactoryCapacitor.js";
+export * from "./factories/FactoryClientWorkDB.js";
 export * from "./factories/FactoryNode.js";
 export * from "./implementations/BrowserWorkDB.js";
 export * from "./implementations/CapacitorWorkDB.js";
