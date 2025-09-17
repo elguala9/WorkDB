@@ -1,7 +1,18 @@
 import { expect } from "chai";
 import { IWorkDb, Item, ItemId } from "iworkdb/index";
+import { eqMessageData } from "./Utility.ts";
 
-
+export type MessageWithId = {
+    id: number;
+};
+export type MessageData = MessageDataGeneric<Uint8Array> & MessageWithId & {};
+export type MessageDataGeneric<DataType> = MessageWithId & {
+    data: DataType;
+};
+export const examplesMessageData: MessageData[] = Array.from({ length: 10 }, (_, i) => ({
+  id: 61 + i,
+  data: new Uint8Array([61 + i, 62 + i, 63 + i])
+}));
 
 
 export function testIWorkDB(workDb: IWorkDb) {
@@ -211,6 +222,220 @@ export function testIWorkDB(workDb: IWorkDb) {
                 expect(collections).to.include('colA');
                 expect(collections).to.include('colB');
                 expect(collections).to.include('colC');
+            });
+
+            it('should handle message data with Uint8Array', async () => {
+                const messageData = examplesMessageData[0];
+                const uniqueId = `single_${Date.now()}_msg_${messageData.id}`;
+                const itemId: ItemId = { id: uniqueId, collection: 'messages_single' };
+                const item: Item = { 
+                    item: { 
+                        id: messageData.id,
+                        data: Array.from(messageData.data), // Convert Uint8Array to regular array for JSON serialization
+                        timestamp: new Date().toISOString()
+                    } 
+                };
+                
+                await workDb.create({ ...itemId, ...item });
+                const result = await workDb.retrieve(itemId);
+                
+                expect(result).to.not.be.null;
+                
+                // Reconstruct MessageData from stored item
+                const retrievedMessageData: MessageData = {
+                    id: result!.item.id as number,
+                    data: new Uint8Array(result!.item.data as number[])
+                };
+                
+                // Use eqMessageData for precise comparison
+                expect(eqMessageData(messageData, retrievedMessageData)).to.be.true;
+            });
+
+            it('should create and retrieve multiple message data items', async () => {
+                const testMessages = examplesMessageData.slice(0, 5);
+                const uniquePrefix = `multi_${Date.now()}`;
+                const items: (ItemId & Item)[] = testMessages.map(msg => ({
+                    id: `${uniquePrefix}_msg_${msg.id}`,
+                    collection: 'messages_multi',
+                    item: {
+                        id: msg.id,
+                        data: Array.from(msg.data),
+                        size: msg.data.length,
+                        created: new Date().toISOString()
+                    }
+                }));
+
+                await workDb.createMultiple(items);
+                
+                const ids = items.map(item => ({ id: item.id, collection: item.collection }));
+                const results = await workDb.retrieveMultiple(ids);
+                
+                expect(results).to.have.lengthOf(5);
+                results.forEach((result, index) => {
+                    expect(result).to.not.be.null;
+                    
+                    // Reconstruct MessageData from stored item
+                    const retrievedMessageData: MessageData = {
+                        id: result!.item.id as number,
+                        data: new Uint8Array(result!.item.data as number[])
+                    };
+                    
+                    // Use eqMessageData for precise comparison
+                    expect(eqMessageData(testMessages[index], retrievedMessageData)).to.be.true;
+                });
+            });
+
+            it('should update message data', async () => {
+                const originalMessage = examplesMessageData[2];
+                const uniqueId = `update_${Date.now()}_msg_${originalMessage.id}`;
+                const itemId: ItemId = { id: uniqueId, collection: 'messages_update' };
+                const item: Item = { 
+                    item: { 
+                        id: originalMessage.id,
+                        data: Array.from(originalMessage.data),
+                        version: 1
+                    } 
+                };
+                
+                await workDb.create({ ...itemId, ...item });
+                
+                // Update with new data
+                const updatedMessage: MessageData = {
+                    id: originalMessage.id,
+                    data: new Uint8Array([100, 101, 102])
+                };
+                
+                const updatedItem: Item = {
+                    item: {
+                        id: updatedMessage.id,
+                        data: Array.from(updatedMessage.data),
+                        version: 2,
+                        updated: new Date().toISOString()
+                    }
+                };
+                
+                await workDb.update({ ...itemId, ...updatedItem });
+                const result = await workDb.retrieve(itemId);
+                
+                expect(result).to.not.be.null;
+                
+                // Reconstruct MessageData from stored item
+                const retrievedMessageData: MessageData = {
+                    id: result!.item.id as number,
+                    data: new Uint8Array(result!.item.data as number[])
+                };
+                
+                // Use eqMessageData to verify the update
+                expect(eqMessageData(updatedMessage, retrievedMessageData)).to.be.true;
+                expect(result!.item.version).to.equal(2);
+            });
+
+            it('should handle large message collection operations', async () => {
+                // Create all example messages with unique IDs
+                const uniquePrefix = `large_${Date.now()}`;
+                const items: (ItemId & Item)[] = examplesMessageData.map(msg => ({
+                    id: `${uniquePrefix}_msg_${msg.id}`,
+                    collection: 'largeMessages',
+                    item: {
+                        id: msg.id,
+                        data: Array.from(msg.data),
+                        checksum: msg.data.reduce((sum, byte) => sum + byte, 0)
+                    }
+                }));
+
+                await workDb.createMultiple(items);
+                
+                // Verify all messages were created
+                const messageIds = await (workDb as any).getItemsInCollection('largeMessages');
+                expect(messageIds.length).to.be.greaterThanOrEqual(examplesMessageData.length);
+                
+                // Delete half of the messages
+                const toDelete = items.slice(0, Math.floor(items.length / 2));
+                for (const item of toDelete) {
+                    await workDb.delete({ id: item.id, collection: item.collection });
+                }
+                
+                // Verify remaining messages
+                const remainingIds = await (workDb as any).getItemsInCollection('largeMessages');
+                expect(remainingIds.length).to.be.lessThan(messageIds.length);
+            });
+
+            it('should preserve binary data integrity', async () => {
+                const messageData = examplesMessageData[5];
+                const itemId: ItemId = { id: `integrity_${messageData.id}`, collection: 'integrity' };
+                const originalArray = Array.from(messageData.data);
+                
+                const item: Item = { 
+                    item: { 
+                        originalData: originalArray,
+                        metadata: {
+                            length: messageData.data.length,
+                            firstByte: messageData.data[0],
+                            lastByte: messageData.data[messageData.data.length - 1]
+                        }
+                    } 
+                };
+                
+                await workDb.create({ ...itemId, ...item });
+                const result = await workDb.retrieve(itemId);
+                
+                expect(result).to.not.be.null;
+                expect(result?.item.originalData).to.deep.equal(originalArray);
+                
+                const metadata = result!.item.metadata as any;
+                expect(metadata.length).to.equal(messageData.data.length);
+                expect(metadata.firstByte).to.equal(messageData.data[0]);
+                expect(metadata.lastByte).to.equal(messageData.data[messageData.data.length - 1]);
+                
+                // Verify we can reconstruct the Uint8Array
+                const reconstructed = new Uint8Array(result!.item.originalData as number[]);
+                expect(reconstructed).to.deep.equal(messageData.data);
+            });
+
+            it('should validate message data equality using eqMessageData', async () => {
+                const testMessages = examplesMessageData.slice(6, 9);
+                
+                // Store all test messages
+                for (const msg of testMessages) {
+                    const itemId: ItemId = { id: `eq_test_${msg.id}`, collection: 'equality_test' };
+                    const item: Item = { 
+                        item: { 
+                            id: msg.id,
+                            data: Array.from(msg.data)
+                        } 
+                    };
+                    await workDb.create({ ...itemId, ...item });
+                }
+                
+                // Retrieve and compare each message
+                for (const originalMsg of testMessages) {
+                    const itemId: ItemId = { id: `eq_test_${originalMsg.id}`, collection: 'equality_test' };
+                    const result = await workDb.retrieve(itemId);
+                    
+                    expect(result).to.not.be.null;
+                    
+                    const retrievedMsg: MessageData = {
+                        id: result!.item.id as number,
+                        data: new Uint8Array(result!.item.data as number[])
+                    };
+                    
+                    // This will use eqMessageData internally and show detailed diff if they don't match
+                    expect(eqMessageData(originalMsg, retrievedMsg)).to.be.true;
+                }
+                
+                // Test that different messages are correctly identified as not equal
+                if (testMessages.length >= 2) {
+                    const firstResult = await workDb.retrieve({ id: `eq_test_${testMessages[0].id}`, collection: 'equality_test' });
+                    const secondOriginal = testMessages[1];
+                    
+                    const firstRetrieved: MessageData = {
+                        id: firstResult!.item.id as number,
+                        data: new Uint8Array(firstResult!.item.data as number[])
+                    };
+                    
+                    // This should be false and will show the differences via notEqual function
+                    expect(eqMessageData(firstRetrieved, secondOriginal)).to.be.false;
+                }
             });
     });
 }
