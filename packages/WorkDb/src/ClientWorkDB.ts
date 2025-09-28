@@ -65,6 +65,24 @@ export class ClientWorkDB implements IWorkDb {
 		}
 	}
 
+	async createOrUpdate(input: Item & ItemId): Promise<void> {
+		const path = this.getItemPath(input);
+		// Check if item exists, create or update accordingly
+		if(await this.workDbInternal.exist(path)) {
+			// Item exists, update it
+			await this.workDbInternal.writeFile(path, { item: input.item });
+		} else {
+			// Item doesn't exist, create it
+			await this.workDbInternal.writeFile(path, { item: input.item });
+		}
+	}
+
+	async createOrUpdateMultiple(inputs: (ItemId & Item)[]): Promise<void> {
+		for (const input of inputs) {
+			await this.createOrUpdate(input);
+		}
+	}
+
 	async retrieve(input: ItemId): Promise<ItemOutput | null> {
 		const path = this.getItemPath(input);
 		if(await this.workDbInternal.exist(path)) {

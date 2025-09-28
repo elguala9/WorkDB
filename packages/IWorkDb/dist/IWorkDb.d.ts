@@ -29,6 +29,18 @@ export interface IWorkDb {
      */
     update: (input: Item & ItemId) => Promise<void>;
     /**
+     * Creates a new item or updates an existing one in the specified collection.
+     * If the item exists, it will be updated; if not, it will be created.
+     * @param input The item data and its collection/id information.
+     */
+    createOrUpdate: (input: Item & ItemId) => Promise<void>;
+    /**
+     * Creates new items or updates existing ones in their respective collections.
+     * For each item: if it exists, it will be updated; if not, it will be created.
+     * @param input Array of item data and their collection/id information.
+     */
+    createOrUpdateMultiple: (input: (ItemId & Item)[]) => Promise<void>;
+    /**
      * Retrieves an item's data from the specified collection and id.
      * Returns the item data and creation date, or null if not found.
      * @param input The collection and id of the item to retrieve.

@@ -437,5 +437,151 @@ export function testIWorkDB(workDb: IWorkDb) {
                     expect(eqMessageData(firstRetrieved, secondOriginal)).to.be.false;
                 }
             });
+
+            it('should create or update a single item (createOrUpdate)', async () => {
+                const itemId: ItemId = { id: 'createOrUpdate1', collection: 'testCreateOrUpdate' };
+                const initialItem: Item = { item: { value: 'initial', version: 1 } };
+                
+                // First call should create the item
+                await (workDb as any).createOrUpdate({ ...itemId, ...initialItem });
+                let result = await workDb.retrieve(itemId);
+                expect(result).to.not.be.null;
+                expect(result?.item.value).to.equal('initial');
+                expect(result?.item.version).to.equal(1);
+                
+                // Second call should update the existing item
+                const updatedItem: Item = { item: { value: 'updated', version: 2 } };
+                await (workDb as any).createOrUpdate({ ...itemId, ...updatedItem });
+                result = await workDb.retrieve(itemId);
+                expect(result).to.not.be.null;
+                expect(result?.item.value).to.equal('updated');
+                expect(result?.item.version).to.equal(2);
+            });
+
+            it('should create or update multiple items (createOrUpdateMultiple)', async () => {
+                const items: (ItemId & Item)[] = [
+                    { id: 'createOrUpdateMulti1', collection: 'testCreateOrUpdateMulti', item: { name: 'Alice', status: 'new' } },
+                    { id: 'createOrUpdateMulti2', collection: 'testCreateOrUpdateMulti', item: { name: 'Bob', status: 'new' } },
+                    { id: 'createOrUpdateMulti3', collection: 'testCreateOrUpdateMulti', item: { name: 'Charlie', status: 'new' } }
+                ];
+                
+                // First call should create all items
+                await (workDb as any).createOrUpdateMultiple(items);
+                let results = await workDb.retrieveMultiple(items.map(i => ({ id: i.id, collection: i.collection })));
+                expect(results).to.have.lengthOf(3);
+                results.forEach((result, index) => {
+                    expect(result).to.not.be.null;
+                    expect(result?.item.name).to.equal(items[index].item.name);
+                    expect(result?.item.status).to.equal('new');
+                });
+                
+                // Update some items
+                const updatedItems: (ItemId & Item)[] = [
+                    { id: 'createOrUpdateMulti1', collection: 'testCreateOrUpdateMulti', item: { name: 'Alice Updated', status: 'updated' } },
+                    { id: 'createOrUpdateMulti2', collection: 'testCreateOrUpdateMulti', item: { name: 'Bob Updated', status: 'updated' } },
+                    { id: 'createOrUpdateMulti4', collection: 'testCreateOrUpdateMulti', item: { name: 'David', status: 'new' } } // New item
+                ];
+                
+                await (workDb as any).createOrUpdateMultiple(updatedItems);
+                
+                // Verify updates and new creation
+                const allIds = [
+                    { id: 'createOrUpdateMulti1', collection: 'testCreateOrUpdateMulti' },
+                    { id: 'createOrUpdateMulti2', collection: 'testCreateOrUpdateMulti' },
+                    { id: 'createOrUpdateMulti3', collection: 'testCreateOrUpdateMulti' }, // Should remain unchanged
+                    { id: 'createOrUpdateMulti4', collection: 'testCreateOrUpdateMulti' }  // Should be newly created
+                ];
+                results = await workDb.retrieveMultiple(allIds);
+                
+                expect(results[0]?.item.name).to.equal('Alice Updated');
+                expect(results[0]?.item.status).to.equal('updated');
+                expect(results[1]?.item.name).to.equal('Bob Updated');
+                expect(results[1]?.item.status).to.equal('updated');
+                expect(results[2]?.item.name).to.equal('Charlie'); // Unchanged
+                expect(results[2]?.item.status).to.equal('new');   // Unchanged
+                expect(results[3]?.item.name).to.equal('David');   // Newly created
+                expect(results[3]?.item.status).to.equal('new');
+            });
+
+            it('should handle createOrUpdate with message data', async () => {
+                const messageData = examplesMessageData[3];
+                const uniqueId = `createOrUpdate_${Date.now()}_msg_${messageData.id}`;
+                const itemId: ItemId = { id: uniqueId, collection: 'messages_createOrUpdate' };
+                
+                // First createOrUpdate - should create
+                const initialItem: Item = { 
+                    item: { 
+                        id: messageData.id,
+                        data: Array.from(messageData.data),
+                        operation: 'created',
+                        timestamp: new Date().toISOString()
+                    } 
+                };
+                
+                await (workDb as any).createOrUpdate({ ...itemId, ...initialItem });
+                let result = await workDb.retrieve(itemId);
+                expect(result).to.not.be.null;
+                expect(result?.item.operation).to.equal('created');
+                
+                let retrievedMessageData: MessageData = {
+                    id: result!.item.id as number,
+                    data: new Uint8Array(result!.item.data as number[])
+                };
+                expect(eqMessageData(messageData, retrievedMessageData)).to.be.true;
+                
+                // Second createOrUpdate - should update with new data
+                const updatedMessageData: MessageData = {
+                    id: messageData.id,
+                    data: new Uint8Array([200, 201, 202, 203])
+                };
+                
+                const updatedItem: Item = {
+                    item: {
+                        id: updatedMessageData.id,
+                        data: Array.from(updatedMessageData.data),
+                        operation: 'updated',
+                        timestamp: new Date().toISOString()
+                    }
+                };
+                
+                await (workDb as any).createOrUpdate({ ...itemId, ...updatedItem });
+                result = await workDb.retrieve(itemId);
+                expect(result).to.not.be.null;
+                expect(result?.item.operation).to.equal('updated');
+                
+                retrievedMessageData = {
+                    id: result!.item.id as number,
+                    data: new Uint8Array(result!.item.data as number[])
+                };
+                expect(eqMessageData(updatedMessageData, retrievedMessageData)).to.be.true;
+            });
+
+            it('should not throw errors with createOrUpdate methods', async () => {
+                const itemId: ItemId = { id: 'noError1', collection: 'noErrorTest' };
+                const item: Item = { item: { test: 'value' } };
+                
+                // These should not throw any errors
+                await (workDb as any).createOrUpdate({ ...itemId, ...item });
+                await (workDb as any).createOrUpdate({ ...itemId, ...item }); // Duplicate should not throw
+                
+                const multiItems: (ItemId & Item)[] = [
+                    { id: 'noError2', collection: 'noErrorTest', item: { test: 'value1' } },
+                    { id: 'noError3', collection: 'noErrorTest', item: { test: 'value2' } }
+                ];
+                
+                await (workDb as any).createOrUpdateMultiple(multiItems);
+                await (workDb as any).createOrUpdateMultiple(multiItems); // Duplicates should not throw
+                
+                // Verify all items exist
+                const results = await workDb.retrieveMultiple([
+                    itemId,
+                    { id: 'noError2', collection: 'noErrorTest' },
+                    { id: 'noError3', collection: 'noErrorTest' }
+                ]);
+                
+                results.forEach(result => {
+                    expect(result).to.not.be.null;
+                });
+            });
     });
 }
