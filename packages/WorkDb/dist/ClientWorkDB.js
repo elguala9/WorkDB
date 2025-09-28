@@ -51,6 +51,23 @@ export class ClientWorkDB {
             throw new Error(`Item with id ${input.id} in collection ${input.collection} does not exist.`);
         }
     }
+    async createOrUpdate(input) {
+        const path = this.getItemPath(input);
+        // Check if item exists, create or update accordingly
+        if (await this.workDbInternal.exist(path)) {
+            // Item exists, update it
+            await this.workDbInternal.writeFile(path, { item: input.item });
+        }
+        else {
+            // Item doesn't exist, create it
+            await this.workDbInternal.writeFile(path, { item: input.item });
+        }
+    }
+    async createOrUpdateMultiple(inputs) {
+        for (const input of inputs) {
+            await this.createOrUpdate(input);
+        }
+    }
     async retrieve(input) {
         const path = this.getItemPath(input);
         if (await this.workDbInternal.exist(path)) {
